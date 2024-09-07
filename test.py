@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from torchvision import transforms 
 from torch.utils.data import DataLoader
 import numpy as np
-
-from forward import Forward
+from model.u_net import SimpleUnet
+from model.forward import ForwardDiffusion
 
 def show_images(datset, num_samples=20, cols=4):
     """ Plots some samples from the dataset """
@@ -55,7 +55,7 @@ data = load_transformed_dataset()
 dataloader = DataLoader(data, batch_size=2, shuffle=True, drop_last=True)
 
 T=100
-forward = Forward(timesteps=T)
+forward = ForwardDiffusion(timesteps=T, scedule_type="linear")
 
 
 
@@ -77,3 +77,57 @@ for idx in range(0, T, stepsize):
     show_tensor_image(img)
 
 plt.show()
+
+model = SimpleUnet()
+
+model.load_state_dict(torch.load("checkpoints/chechpoint_epoch_1_56.8%_estimated_loss_0.799/model.pth"))
+
+
+@torch.no_grad()
+def sample_timestep(x, t):
+    """
+    Calls the model to predict the noise in the image and returns 
+    the denoised image. 
+    Applies noise to this image, if we are not in the last step yet.
+    """
+    betas_t = forward.get_index_from_list(forward.betas, t, x.shape)
+    sqrt_one_minus_alphas_cumprod_t = forward.get_index_from_list(
+        forward.sqrt_one_minus_alphas_cumprod, t, x.shape
+    )
+    sqrt_recip_alphas_t = forward.get_index_from_list(forward.sqrt_recip_alphas, t, x.shape)
+    
+    # Call model (current image - noise prediction)
+    model_mean = sqrt_recip_alphas_t * (
+        x - betas_t * model(x, t, torch.tensor([0])) / sqrt_one_minus_alphas_cumprod_t
+    )
+    posterior_variance_t = forward.get_index_from_list(forward.posterior_variance, t, x.shape)
+    
+    if t == 0:
+        # As pointed out by Luis Pereira (see YouTube comment)
+        # The t's are offset from the t's in the paper
+        return model_mean
+    else:
+        noise = torch.randn_like(x)
+        return model_mean + torch.sqrt(posterior_variance_t) * noise 
+
+@torch.no_grad()
+def sample_plot_image():
+    # Sample noise
+    img_size = 28
+    img = torch.randn((1, 1, img_size, img_size))
+    plt.figure(figsize=(15,15))
+    plt.axis('off')
+    num_images = 10
+    stepsize = int(T/num_images)
+
+    for i in range(0,T)[::-1]:
+        t = torch.full((1,), i, dtype=torch.long)
+        img = sample_timestep(img, t)
+        # Edit: This is to maintain the natural range of the distribution
+        img = torch.clamp(img, -1.0, 1.0)
+        if i % stepsize == 0:
+            plt.subplot(1, num_images, int(i/stepsize)+1)
+            show_tensor_image(img.detach().cpu())
+    plt.show()        
+
+sample_plot_image()
