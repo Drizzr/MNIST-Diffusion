@@ -44,6 +44,7 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer, load_optim
 
 
     trainer.step = params["step"] * (checkpoint_batch_size // current_batch_size)
+    trainer.total_step = params["total_step"] 
 
     return trainer, model
 
@@ -91,6 +92,9 @@ def main():
     parser.add_argument("--from_check_point", action='store_true',
                         default=False, help="Training from checkpoint or not")
     
+    parser.add_argument("--load_optimizer", action='store_true',
+                        default=False, help="Load optimizer state from checkpoint or not")
+    
     parser.add_argument("--clip", type=float, default=5.0, help="gradient clipping")
 
     parser.add_argument("--lr", type=float, default=4*10**(-4), help="learning rate")
@@ -121,7 +125,7 @@ def main():
     print("sucessfully loaded dataset...")
 
     if from_check_point:
-        trainer, model = load_from_checkpoint(args, forward, dataset, val_dataset, writer, load_optimizer=True)
+        trainer, model = load_from_checkpoint(args, forward, dataset, val_dataset, writer, load_optimizer=args.load_optimizer)
     
     else:
         model = Unet(

@@ -56,7 +56,7 @@ class Trainer(object):
 
 
     def train(self):
-        stepComputeTime = time.process_time()
+        stepComputeTime = time.time()
         mes = "Epoch {}, step:{}/{} {:.2f}%, Loss:{:.4f}, Perplexity:{:.4f}, time (s): {:.2f}, Epochtime (h): {:.2f}"
         print("Training on 👀: ", self.device)
 
@@ -69,7 +69,6 @@ class Trainer(object):
         with_stack=True
         ) as prof:
             
-
             while self.epoch <= self.last_epoch:
                 losses = 0.0
 
@@ -100,14 +99,14 @@ class Trainer(object):
                     # log message
                     if self.step % self.args.print_freq == 0:
                         avg_loss = losses / self.args.print_freq
-                        remaining_time = (time.process_time() - stepComputeTime) * (len(self.dataset)-self.step)/(3600 * self.args.print_freq)
+                        remaining_time = (time.time() - stepComputeTime) * (len(self.dataset)-self.step)/(3600 * self.args.print_freq)
                         
                         print(mes.format(
                             self.epoch, self.step, len(self.dataset),
                             100 * self.step / len(self.dataset),
                             avg_loss,
                             2**avg_loss,
-                            time.process_time() - stepComputeTime,
+                            time.time() - stepComputeTime,
                             remaining_time,
 
                         ))
@@ -115,7 +114,7 @@ class Trainer(object):
                         self.writer.add_scalar("Loss", avg_loss, self.total_step)
 
 
-                        stepComputeTime = time.process_time()
+                        stepComputeTime = time.time()
                         self.losses.append(avg_loss)
                         losses = 0.0
                         
@@ -143,17 +142,13 @@ class Trainer(object):
 
                 loss = self.p_losses(self.model, imgs, t, class_, loss_type="huber")
 
-
-
             val_total_loss += loss
             i += 1
 
         avg_loss = val_total_loss / limit
 
         self.writer.add_scalar("Validation Loss", avg_loss, self.total_step)
-
         self.val_losses.append(avg_loss)
-
         self.writer.flush()
 
 
@@ -172,6 +167,7 @@ class Trainer(object):
             "batch_size": self.args.batch_size,
             "timesteps": self.timesteps,
             "p_uncond": self.p_uncond,
+            "total_step": self.total_step,
 
             }
         
