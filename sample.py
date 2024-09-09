@@ -15,15 +15,13 @@ model = Unet(
         dim_mults=(1, 2, 4,)
     )
 
-
-
 parser = argparse.ArgumentParser(description="Sample from the model")
 
 parser.add_argument("--batch_size", type=int, default=4, help="Batch size for sampling, must be a square number")
 parser.add_argument("--timesteps", type=int, default=200, help="Number of timesteps")
 parser.add_argument("--w", type=float, default=0.1, help="Temperature parameter")
-parser.add_argument("--c", type=int, default=9, help="Class to sample from")
-parser.add_argument("--model_path", type=str, default="checkpoints/checkpoint_epoch_7_0.0%_estimated_loss_0.059/model.pth", help="Path to the model")
+parser.add_argument("--c", type=int, default=1, help="Class to sample from")
+parser.add_argument("--model_path", type=str, default="checkpoints/checkpoint_epoch_11_0.0%_estimated_loss_0.055/model.pth", help="Path to the model")
 parser.add_argument("--animate", action='store_true',
                         default=True, help="Animate the diffusion process, for a single sample")
 
@@ -45,11 +43,7 @@ model.eval()
 
 forward = ForwardDiffusion(timesteps=time_steps, start=0.0001, end=0.02)
 
-
-
 samples = forward.sample(model, image_size=28, batch_size=BATCH_SIZE, channels=1, class_=torch.tensor([class_]), w=w)
-
-
 
 
 # create a grid of 8x8 images
@@ -59,8 +53,7 @@ for i in range(int(np.sqrt(BATCH_SIZE))):
         ax[i, j].imshow(samples[-1][i*int(np.sqrt(BATCH_SIZE))+j].reshape(28, 28, 1), cmap="gray")
         ax[i, j].axis('off')
 
-plt.show()
-
+fig.savefig("samples.png")
 
 
 if animate:
@@ -75,4 +68,5 @@ if animate:
 
     animate = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
     animate.save('diffusion.gif')
-    plt.show()
+
+plt.show()

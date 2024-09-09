@@ -8,7 +8,7 @@ import torch.nn.functional as F
 
 class Trainer(object):
     def __init__(self, model,
-                dataset, args, val_dataset, forward_diffusion, optimizer, writer, timesteps, p_uncond,
+                dataset, args, val_dataset, forward_diffusion, optimizer, writer, timesteps, p_uncond, lr_scheduler=None,
                 init_epoch=1, last_epoch=15):
 
 
@@ -28,6 +28,7 @@ class Trainer(object):
         self.last_epoch = last_epoch
         self.best_val_loss = 1e18
         self.optimizer = optimizer
+        self.lr_scheduler = lr_scheduler
         self.writer = writer
 
         self.losses = []
@@ -54,10 +55,9 @@ class Trainer(object):
         return loss
 
 
-
     def train(self):
         stepComputeTime = time.time()
-        mes = "Epoch {}, step:{}/{} {:.2f}%, Loss:{:.4f}, Perplexity:{:.4f}, time (s): {:.2f}, Epochtime (h): {:.2f}"
+        mes = "Epoch {}, step:{}/{} {:.2f}%, Loss:{:.4f}, Perplexity:{:.4f}, time (s): {:.2f}, Epochtime (min): {:.2f}, lr: {:.6f}"
         print("Training on 👀: ", self.device)
 
         with torch.profiler.profile(
@@ -69,7 +69,7 @@ class Trainer(object):
         with_stack=True
         ) as prof:
             
-            while self.epoch <= self.last_epoch:
+            while self.epoch < self.last_epoch:
                 losses = 0.0
 
                 for i, data in enumerate(self.dataset):
@@ -82,7 +82,7 @@ class Trainer(object):
                     t = torch.randint(0, self.timesteps, (self.args.batch_size,), device=self.device).long()
                     imgs.to(self.device)
 
-                    # randomly asign class 11 to p_uncond of the data
+                    # randomly asign class 10 to p_uncond of the data
                     class_ = torch.where(torch.rand(self.args.batch_size) < self.p_uncond, torch.tensor(10), class_)
 
                     loss = self.p_losses(self.model, imgs, t, class_, loss_type="huber")
@@ -90,6 +90,7 @@ class Trainer(object):
                     loss.backward()
 
                     self.optimizer.step()
+                    self.lr_scheduler.step()
 
                     self.step += 1
                     self.total_step += 1
@@ -99,7 +100,7 @@ class Trainer(object):
                     # log message
                     if self.step % self.args.print_freq == 0:
                         avg_loss = losses / self.args.print_freq
-                        remaining_time = (time.time() - stepComputeTime) * (len(self.dataset)-self.step)/(3600 * self.args.print_freq)
+                        remaining_time = (time.time() - stepComputeTime) * (len(self.dataset)-self.step)/(60 * self.args.print_freq)
                         
                         print(mes.format(
                             self.epoch, self.step, len(self.dataset),
@@ -108,26 +109,22 @@ class Trainer(object):
                             2**avg_loss,
                             time.time() - stepComputeTime,
                             remaining_time,
+                            self.optimizer.param_groups[0]["lr"]
 
                         ))
 
                         self.writer.add_scalar("Loss", avg_loss, self.total_step)
-
-
+                        self.writer.add_scalar("Lr", self.optimizer.param_groups[0]["lr"], self.total_step)
                         stepComputeTime = time.time()
                         self.losses.append(avg_loss)
                         losses = 0.0
-                        
-                self.validate()
-
-                self.writer.flush()
 
                 self.epoch += 1
                 self.step = 0
 
-                self.save_model(epoch=True)
+                self.save_model()
 
-    def validate(self, limit=100):
+    def validate(self, limit=300):
 
         val_total_loss = 0.0
 
@@ -152,8 +149,7 @@ class Trainer(object):
         self.writer.flush()
 
 
-
-    def save_model(self, epoch=False):
+    def save_model(self):
         print("saving model...")
         self.validate()
         path = "checkpoints" + "/" + f"checkpoint_epoch_{self.epoch}_{round(self.step/len(self.dataset)*100, 3)}%_estimated_loss_{round(float(self.val_losses[-1]), 3)}"
@@ -177,6 +173,7 @@ class Trainer(object):
         
         torch.save(self.model.state_dict(), os.path.join(path, "model.pth"))
         torch.save(self.optimizer.state_dict(), os.path.join(path, "optimizer.pth"))
+        torch.save(self.lr_scheduler.state_dict(), os.path.join(path, "lr_scheduler.pth"))
 
         print("model saved successfully...")
 

@@ -25,19 +25,26 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer, load_optim
         dim_mults=(1, 2, 4,)
     )
     
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.decay_k)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+
+    lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=0.01, step_size_up=2000, step_size_down=None, 
+                                mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
+                                base_momentum=0.8, max_momentum=0.9, last_epoch=- 1, verbose=False)
     
     model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth")))
 
     if load_optimizer:
         optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth")))
+        lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth")))
         print("optimizer state loaded successfully...")
 
     print("model loaded successfully...")
 
     trainer = Trainer(model, dataset, args, val_dataset, 
                         init_epoch=params["epoch"], 
-                        last_epoch=args.num_epochs, writer=writer, optimizer=optimizer, forward_diffusion=forward, p_uncond=params["p_uncond"], timesteps=params["timesteps"])
+                        last_epoch=args.num_epochs, writer=writer, optimizer=optimizer, forward_diffusion=forward, 
+                        p_uncond=params["p_uncond"], timesteps=params["timesteps"],
+                        lr_scheduler=lr_scheduler)
 
     current_batch_size = args.batch_size
     checkpoint_batch_size = params["batch_size"]
@@ -85,7 +92,7 @@ def main():
     
     parser.add_argument("--decay_k", type=float, default=0.002,) 
 
-    parser.add_argument("--p_uncond", type=float, default=0.1, help="probability of unconditional sampling")
+    parser.add_argument("--p_uncond", type=float, default=0.2, help="probability of unconditional sampling")
 
     parser.add_argument("--timesteps", type=int, default=200, help="number of timesteps")
 
@@ -93,9 +100,9 @@ def main():
                         default=False, help="Training from checkpoint or not")
     
     parser.add_argument("--load_optimizer", action='store_true',
-                        default=False, help="Load optimizer state from checkpoint or not")
+                        default=True, help="Load optimizer state from checkpoint or not")
     
-    parser.add_argument("--clip", type=float, default=5.0, help="gradient clipping")
+    parser.add_argument("--clip", type=float, default=10.0, help="gradient clipping")
 
     parser.add_argument("--lr", type=float, default=4*10**(-4), help="learning rate")
 
@@ -135,10 +142,13 @@ def main():
             )
         
         
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.decay_k)
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+        lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=0.01, step_size_up=2000, step_size_down=None, 
+                                mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
+                                base_momentum=0.8, max_momentum=0.9, last_epoch=- 1, verbose=False)
 
 
-        trainer = Trainer(model, dataset, args, val_dataset, writer=writer, optimizer=optimizer, forward_diffusion=forward, timesteps=args.timesteps, p_uncond=args.p_uncond)
+        trainer = Trainer(model, dataset, args, val_dataset, writer=writer, optimizer=optimizer, forward_diffusion=forward, timesteps=args.timesteps, p_uncond=args.p_uncond, lr_scheduler=lr_scheduler)
     
     print("_________________________________________________________________")
     print("trainable parameters: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
