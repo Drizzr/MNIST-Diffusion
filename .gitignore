@@ -1,3 +1,5 @@
 venv
 runs
 .Ds_Store
+__pycache__
+/__pycache__
