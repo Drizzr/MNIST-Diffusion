@@ -60,69 +60,69 @@ class Trainer(object):
         mes = "Epoch {}, step:{}/{} {:.2f}%, Loss:{:.4f}, Perplexity:{:.4f}, time (s): {:.2f}, Epochtime (min): {:.2f}, lr: {:.6f}"
         print("Training on 👀: ", self.device)
 
-        with torch.profiler.profile(
+        """with torch.profiler.profile(
         on_trace_ready=torch.profiler.tensorboard_trace_handler('runs/'),
         schedule=torch.profiler.schedule(repeat=1, wait=1, warmup=1, active=3),
         activities=[torch.profiler.ProfilerActivity.CUDA if torch.cuda.is_available() else torch.profiler.ProfilerActivity.CPU],
         record_shapes=True,
         profile_memory=True,
         with_stack=True
-        ) as prof:
+        ) as prof:"""
             
-            while self.epoch < self.last_epoch:
-                losses = 0.0
+        while self.epoch < self.last_epoch:
+            losses = 0.0
 
-                for i, data in enumerate(self.dataset):
+            for i, data in enumerate(self.dataset):
 
-                    prof.step()
-                    self.model.train()
-                    self.optimizer.zero_grad()
+                #prof.step()
+                self.model.train()
+                self.optimizer.zero_grad()
 
-                    imgs, class_ = data # imgs -> (batch_size, 1, 28, 28), class_ -> (batch_size,)
-                    t = torch.randint(0, self.timesteps, (self.args.batch_size,), device=self.device).long()
-                    imgs.to(self.device)
+                imgs, class_ = data # imgs -> (batch_size, 1, 28, 28), class_ -> (batch_size,)
+                t = torch.randint(0, self.timesteps, (self.args.batch_size,), device=self.device).long()
+                imgs.to(self.device)
 
-                    # randomly asign class 10 to p_uncond of the data
-                    class_ = torch.where(torch.rand(self.args.batch_size) < self.p_uncond, torch.tensor(10), class_)
+                # randomly asign class 10 to p_uncond of the data
+                class_ = torch.where(torch.rand(self.args.batch_size) < self.p_uncond, torch.tensor(10), class_)
 
-                    loss = self.p_losses(self.model, imgs, t, class_, loss_type="huber")
+                loss = self.p_losses(self.model, imgs, t, class_, loss_type="huber")
 
-                    loss.backward()
+                loss.backward()
 
-                    self.optimizer.step()
-                    self.lr_scheduler.step()
+                self.optimizer.step()
+                self.lr_scheduler.step()
 
-                    self.step += 1
-                    self.total_step += 1
-                        
-                    losses += loss.item()
+                self.step += 1
+                self.total_step += 1
+                    
+                losses += loss.item()
 
-                    # log message
-                    if self.step % self.args.print_freq == 0:
-                        avg_loss = losses / self.args.print_freq
-                        remaining_time = (time.time() - stepComputeTime) * (len(self.dataset)-self.step)/(60 * self.args.print_freq)
-                        
-                        print(mes.format(
-                            self.epoch, self.step, len(self.dataset),
-                            100 * self.step / len(self.dataset),
-                            avg_loss,
-                            2**avg_loss,
-                            time.time() - stepComputeTime,
-                            remaining_time,
-                            self.optimizer.param_groups[0]["lr"]
+                # log message
+                if self.step % self.args.print_freq == 0:
+                    avg_loss = losses / self.args.print_freq
+                    remaining_time = (time.time() - stepComputeTime) * (len(self.dataset)-self.step)/(60 * self.args.print_freq)
+                    
+                    print(mes.format(
+                        self.epoch, self.step, len(self.dataset),
+                        100 * self.step / len(self.dataset),
+                        avg_loss,
+                        2**avg_loss,
+                        time.time() - stepComputeTime,
+                        remaining_time,
+                        self.optimizer.param_groups[0]["lr"]
 
-                        ))
+                    ))
 
-                        self.writer.add_scalar("Loss", avg_loss, self.total_step)
-                        self.writer.add_scalar("Lr", self.optimizer.param_groups[0]["lr"], self.total_step)
-                        stepComputeTime = time.time()
-                        self.losses.append(avg_loss)
-                        losses = 0.0
+                    self.writer.add_scalar("Loss", avg_loss, self.total_step)
+                    self.writer.add_scalar("Lr", self.optimizer.param_groups[0]["lr"], self.total_step)
+                    stepComputeTime = time.time()
+                    self.losses.append(avg_loss)
+                    losses = 0.0
 
-                self.epoch += 1
-                self.step = 0
+            self.epoch += 1
+            self.step = 0
 
-                self.save_model()
+            self.save_model()
 
     def validate(self, limit=300):
 

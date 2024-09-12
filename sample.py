@@ -21,7 +21,7 @@ parser.add_argument("--batch_size", type=int, default=4, help="Batch size for sa
 parser.add_argument("--timesteps", type=int, default=200, help="Number of timesteps")
 parser.add_argument("--w", type=float, default=0.1, help="Temperature parameter")
 parser.add_argument("--c", type=int, default=1, help="Class to sample from")
-parser.add_argument("--model_path", type=str, default="checkpoints/checkpoint_epoch_24_0.0%_estimated_loss_0.038/model.pth", help="Path to the model")
+parser.add_argument("--model_path", type=str, default="checkpoints/checkpoint_epoch_28_0.0%_estimated_loss_0.037/model.pth", help="Path to the model")
 parser.add_argument("--animate", action='store_true',
                         default=True, help="Animate the diffusion process, for a single sample")
 
