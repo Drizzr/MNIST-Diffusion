@@ -48,3 +48,6 @@ python3 train.py
 - The classifier guidance weight (`w`) might need tuning for different classes.
   
 Feel free to explore and modify the code to suit your needs!
+
+## Examples:
+
