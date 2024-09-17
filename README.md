@@ -29,6 +29,7 @@ To train the model, run the following command:
 ```bash
 python3 train.py
 ```
+![image](https://github.com/user-attachments/assets/65315b33-251f-4235-8835-8dc42948b9a6)
 
 ### Training Options:
 - `--num_epochs`: Number of training epochs (default: 5).
