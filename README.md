@@ -32,6 +32,8 @@ python3 train.py
 
 ### Training Progress:
 During training, the model's loss decreases steadily as shown in the following plot, which reflects the improvement in performance as the epochs progress:
+
+
 ![image](https://github.com/user-attachments/assets/65315b33-251f-4235-8835-8dc42948b9a6)
 
 ### Training Options:
