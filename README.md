@@ -50,4 +50,14 @@ python3 train.py
 Feel free to explore and modify the code to suit your needs!
 
 ## Examples:
+![diffusion-1](https://github.com/user-attachments/assets/2fe5770a-d402-4865-8f0c-ec977c7ff20e)
 
+![diffusion-2](https://github.com/user-attachments/assets/7ee2d08b-15b1-4253-9ff4-a550df7c9668)
+
+![diffusion-3](https://github.com/user-attachments/assets/ce6ba0b8-33e2-4951-b1c5-90851d9b92c3)
+
+![diffusion-4](https://github.com/user-attachments/assets/25eb0b8b-9051-4af9-9518-7436f973d57b)
+
+![diffusion-5](https://github.com/user-attachments/assets/aa774bb4-597a-46e0-a91e-720c223eb90b)
+
+![diffusion](https://github.com/user-attachments/assets/e59f2e20-3b2d-472e-af3a-2744d7f7a332)
