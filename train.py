@@ -90,8 +90,6 @@ def main():
 
     parser.add_argument("--print_freq", type=int, default=100)
     
-    parser.add_argument("--decay_k", type=float, default=0.002,) 
-
     parser.add_argument("--p_uncond", type=float, default=0.2, help="probability of unconditional sampling")
 
     parser.add_argument("--timesteps", type=int, default=200, help="number of timesteps")
@@ -106,7 +104,8 @@ def main():
 
     parser.add_argument("--lr", type=float, default=4*10**(-4), help="learning rate")
 
-    parser.add_argument("--save_dir", type=str, default="checkpoints/", help="directory to save model")
+    parser.add_argument("--save_dir", type=str, help="directory of the saved checkpoint of the model")
+
 
     args = parser.parse_args()
 
