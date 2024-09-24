@@ -30,7 +30,7 @@ args = parser.parse_args()
 
 BATCH_SIZE = args.batch_size
 time_steps = args.timesteps
-w = args.w
+guidance = args.guidance
 class_ = args.c
 animate = args.animate
 
@@ -43,7 +43,7 @@ model.eval()
 
 forward = ForwardDiffusion(timesteps=time_steps, start=0.0001, end=0.02)
 
-samples = forward.sample(model, image_size=28, batch_size=BATCH_SIZE, channels=1, class_=torch.tensor([class_]), w=w)
+samples = forward.sample(model, image_size=28, batch_size=BATCH_SIZE, channels=1, class_=torch.tensor([class_]), guidance=guidance) 
 
 
 # create a grid of 8x8 images
@@ -62,7 +62,7 @@ if animate:
 
     fig = plt.figure()
     ims = []
-    for i in range(200):
+    for i in range(0, 200):
         im = plt.imshow(samples[i][random_index].reshape(28, 28, 1), cmap="gray", animated=True)
         ims.append([im])
 
