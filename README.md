@@ -17,7 +17,7 @@ python3 sample.py
 
 ### Sampling Options:
 - `--c [0-9]`: Specify the class (0-9) for class-conditional sampling.
-- `--w float`: Guidance strength. A lower `w` results in stronger guidance. The default value `w=0.8` seems to work well, though this may need adjustment for different classes.
+- `--guidance float`: Guidance strength. The default value `w=7` seems to work well, though this may need adjustment for different classes.
 - `--model_path`: Load a model checkpoint. Based on previous results, checkpoint from epoch 37 works best.
 - `--batch_size`: Specify the number of images to sample. Ideally, this should be a square number for visualization purposes.
 - `--animate`: Add this flag to visualize the reverse diffusion process for one random image in the batch.

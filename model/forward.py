@@ -79,7 +79,7 @@ class ForwardDiffusion:
     
 
     @torch.no_grad()
-    def p_sample(self, model, x, t, t_index, class_, w):
+    def p_sample(self, model, x, t, t_index, class_, guidance):
         betas_t = self.get_index_from_list(self.betas, t, x.shape)
         sqrt_one_minus_alphas_cumprod_t = self.get_index_from_list(
             self.sqrt_one_minus_alphas_cumprod, t, x.shape
@@ -89,11 +89,11 @@ class ForwardDiffusion:
         # Equation 11 in the paper
         # Use our model (noise predictor) to predict the mean
 
-        pred_noise = (1+w) * model(x, t, class_) - w * model(x, t, torch.tensor([10]))
-
+        #pred_noise = (1+w) * model(x, t, class_) - w * model(x, t, torch.tensor([10]))
+        pred_noise = model(x, t,torch.tensor([10])) + guidance * ((model(x, t, class_) - model(x, t,torch.tensor([10]))))
 
         model_mean = sqrt_recip_alphas_t * (
-            x - betas_t * model(x, t, class_) / sqrt_one_minus_alphas_cumprod_t
+            x - betas_t * pred_noise / sqrt_one_minus_alphas_cumprod_t
         )
 
         if t_index == 0:
@@ -106,7 +106,7 @@ class ForwardDiffusion:
 
     # Algorithm 2 but save all images:
     @torch.no_grad()
-    def p_sample_loop(self, model, shape, class_, w):
+    def p_sample_loop(self, model, shape, class_, guidance):
         device = next(model.parameters()).device
 
         b = shape[0]
@@ -115,10 +115,10 @@ class ForwardDiffusion:
         imgs = []
         
         for i in tqdm(reversed(range(0, self.timesteps)), desc='sampling loop time step', total=self.timesteps):
-            img = self.p_sample(model, img, torch.full((b,), i, device=device, dtype=torch.long), i, class_, w)
+            img = self.p_sample(model, img, torch.full((b,), i, device=device, dtype=torch.long), i, class_, guidance)
             imgs.append(img.cpu().numpy())
         return imgs
 
     @torch.no_grad()
-    def sample(self, model, image_size, batch_size=16, channels=3, class_=None, w=3):
-        return self.p_sample_loop(model, shape=(batch_size, channels, image_size, image_size), class_=class_, w=w)   
+    def sample(self, model, image_size, batch_size=16, channels=3, class_=None, guidance=3):
+        return self.p_sample_loop(model, shape=(batch_size, channels, image_size, image_size), class_=class_, guidance=guidance)   
