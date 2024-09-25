@@ -37,7 +37,7 @@ animate = args.animate
 print("Sampling from the model...")
 
 
-model.load_state_dict(torch.load(args.model_path))
+model.load_state_dict(torch.load(args.model_path, weights_only=True))
 model.eval()
 
 

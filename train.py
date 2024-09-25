@@ -31,11 +31,11 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer, load_optim
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
                                 base_momentum=0.8, max_momentum=0.9, last_epoch=- 1, verbose=False)
     
-    model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth")))
+    model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth"), weights_only=True))
 
     if load_optimizer:
-        optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth")))
-        lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth")))
+        optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth"), weights_only=True))
+        lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth"), weights_only=True))
         print("optimizer state loaded successfully...")
 
     print("model loaded successfully...")
