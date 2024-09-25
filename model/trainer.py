@@ -109,12 +109,12 @@ class Trainer(object):
                         2**avg_loss,
                         time.time() - stepComputeTime,
                         remaining_time,
-                        self.optimizer.param_groups[0]["lr"]
+                        self.lr_scheduler.get_last_lr()[0]
 
                     ))
 
                     self.writer.add_scalar("Loss", avg_loss, self.total_step)
-                    self.writer.add_scalar("Lr", self.optimizer.param_groups[0]["lr"], self.total_step)
+                    self.writer.add_scalar("Lr", self.lr_scheduler.get_last_lr()[0], self.total_step)
                     stepComputeTime = time.time()
                     self.losses.append(avg_loss)
                     losses = 0.0

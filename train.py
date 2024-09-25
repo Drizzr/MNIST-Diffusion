@@ -13,7 +13,7 @@ import os
 
 
 
-def load_from_checkpoint(args, forward, dataset, val_dataset, writer, load_optimizer=True):
+def load_from_checkpoint(args, forward, dataset, val_dataset, writer):
     """Load model from checkpoint"""
     print("loading model from checkpoint...")
     with open(os.path.join(args.save_dir, "params.json"), "r") as f:
@@ -33,10 +33,9 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer, load_optim
     
     model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth"), weights_only=True))
 
-    if load_optimizer:
-        optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth"), weights_only=True))
-        lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth"), weights_only=True))
-        print("optimizer state loaded successfully...")
+
+    optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth"), weights_only=True))
+    lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth"), weights_only=True))
 
     print("model loaded successfully...")
 
@@ -97,9 +96,6 @@ def main():
     parser.add_argument("--from_check_point", action='store_true',
                         default=False, help="Training from checkpoint or not")
     
-    parser.add_argument("--load_optimizer", action='store_true',
-                        default=True, help="Load optimizer state from checkpoint or not")
-    
     parser.add_argument("--clip", type=float, default=10.0, help="gradient clipping")
 
     parser.add_argument("--lr", type=float, default=4*10**(-4), help="learning rate")
@@ -131,7 +127,7 @@ def main():
     print("sucessfully loaded dataset...")
 
     if from_check_point:
-        trainer, model = load_from_checkpoint(args, forward, dataset, val_dataset, writer, load_optimizer=args.load_optimizer)
+        trainer, model = load_from_checkpoint(args, forward, dataset, val_dataset, writer)
     
     else:
         model = Unet(

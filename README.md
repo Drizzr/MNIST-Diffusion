@@ -44,7 +44,6 @@ During training, the model's loss decreases steadily as shown in the following p
 - `--p_uncond`: Probability of unconditional sampling (default: 0.2).
 - `--timesteps`: Number of timesteps for diffusion training (default: 200).
 - `--from_check_point`: Add this flag if you wish to continue training from a saved checkpoint.
-- `--load_optimizer`: Option to load the optimizer state from a checkpoint (default: True).
 - `--clip`: Gradient clipping value (default: 10.0).
 - `--lr`: Learning rate (default: 4e-4).
 - `--save_dir`: Directory where model checkpoints will be loaded from.
