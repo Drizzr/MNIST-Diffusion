@@ -28,7 +28,6 @@ class ForwardDiffusion:
         self.alphas_cumprod_prev = F.pad(self.alphas_cumprod[:-1], (1, 0), value=1.0)
         self.posterior_variance = self.betas * (1. - self.alphas_cumprod_prev) / (1. - self.alphas_cumprod)
         
-        print(self.posterior_variance)
     @staticmethod
     def get_index_from_list(vals, t, x_shape):
         """ 
