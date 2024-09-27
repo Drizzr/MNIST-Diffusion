@@ -56,19 +56,14 @@ class Trainer(object):
 
 
     def train(self):
+
+        self.model.to(self.device)
+        self.model = torch.compile(self.model)
+
         stepComputeTime = time.time()
         mes = "Epoch {}, step:{}/{} {:.2f}%, Loss:{:.4f}, Perplexity:{:.4f}, time (s): {:.2f}, Epochtime (min): {:.2f}, lr: {:.6f}"
         print("Training on 👀: ", self.device)
-
-        """with torch.profiler.profile(
-        on_trace_ready=torch.profiler.tensorboard_trace_handler('runs/'),
-        schedule=torch.profiler.schedule(repeat=1, wait=1, warmup=1, active=3),
-        activities=[torch.profiler.ProfilerActivity.CUDA if torch.cuda.is_available() else torch.profiler.ProfilerActivity.CPU],
-        record_shapes=True,
-        profile_memory=True,
-        with_stack=True
-        ) as prof:"""
-            
+ 
         while self.epoch < self.last_epoch:
             losses = 0.0
 
@@ -80,10 +75,13 @@ class Trainer(object):
 
                 imgs, class_ = data # imgs -> (batch_size, 1, 28, 28), class_ -> (batch_size,)
                 t = torch.randint(0, self.timesteps, (self.args.batch_size,), device=self.device).long()
+                
                 imgs.to(self.device)
 
                 # randomly asign class 10 to p_uncond of the data
                 class_ = torch.where(torch.rand(self.args.batch_size) < self.p_uncond, torch.tensor(10), class_)
+
+                class_.to(self.device)
 
                 loss = self.p_losses(self.model, imgs, t, class_, loss_type="huber")
 
@@ -96,6 +94,9 @@ class Trainer(object):
                 self.total_step += 1
                     
                 losses += loss.item()
+
+                if self.device == "cuda":
+                    torch.cuda.synchronize()
 
                 # log message
                 if self.step % self.args.print_freq == 0:
