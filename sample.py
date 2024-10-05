@@ -51,8 +51,11 @@ samples = forward.sample(model, image_size=28, batch_size=BATCH_SIZE, channels=1
 fig, ax = plt.subplots(int(np.sqrt(BATCH_SIZE)), int(np.sqrt(BATCH_SIZE)), figsize=(10, 10))
 for i in range(int(np.sqrt(BATCH_SIZE))):
     for j in range(int(np.sqrt(BATCH_SIZE))):
-        ax[i, j].imshow(samples[-1][i*int(np.sqrt(BATCH_SIZE))+j].reshape(28, 28, 1), cmap="gray")
-        ax[i, j].axis('off')
+        if args.channels == 1:
+            ax[i, j].imshow(samples[-1][i*int(np.sqrt(BATCH_SIZE))+j].reshape(args.img_size, args.img_size, args.channels), cmap="gray")
+        else:
+            ax[i, j].imshow(samples[-1][i*int(np.sqrt(BATCH_SIZE))+j].reshape(args.img_size, args.img_size, args.channels))
+
 
 fig.savefig("samples.png")
 
@@ -64,7 +67,11 @@ if animate:
     fig = plt.figure()
     ims = []
     for i in range(0, 200):
-        im = plt.imshow(samples[i][random_index].reshape(28, 28, 1), cmap="gray", animated=True)
+        if args.channels == 1:
+            im = plt.imshow(samples[i][random_index].reshape(args.img_size, args.img_size, args.channels), cmap="gray", animated=True)
+
+        else:
+            im = plt.imshow(samples[i][random_index].reshape(args.img_size, args.img_size, args.channels), animated=True)
         ims.append([im])
 
     animate = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
