@@ -64,11 +64,11 @@ def load_transformed_dataset(train=True):
     data_transform = transforms.Compose(data_transforms)
 
     if train:
-        data = torchvision.datasets.CIFAR10(root="./data_CIFAR10", download=True, 
+        data = torchvision.datasets.CIFAR10(root="./data", download=True, 
                                             transform=data_transform, train=True)
 
     else:
-        data = torchvision.datasets.CIFAR10(root="./data_CIFAR10", download=True, 
+        data = torchvision.datasets.CIFAR10(root="./data", download=True, 
                                             transform=data_transform, train=False)
     return data
 
