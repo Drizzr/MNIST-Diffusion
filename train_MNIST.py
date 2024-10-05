@@ -19,17 +19,29 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer):
     with open(os.path.join(args.save_dir, "params.json"), "r") as f:
         params = json.load(f)
 
-    model = Unet(
-        dim=28,
-        channels=1,
-        dim_mults=(1, 2, 4,)
-    )
-    
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    try:
+        args.img_size = params["img_size"]
+        args.channels = params["channels"]
+        args.n_classes = params["n_classes"]
+        args.dim_mults = params["dim_mults"]
 
-    lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=0.01, step_size_up=2000, step_size_down=None, 
+    except KeyError:
+        # for backward compatibility
+        print("params file incomplete, using default values...")
+        pass
+        
+    model = Unet(
+            dim=args.img_size,
+            channels=args.channels,
+            dim_mults=(1, 2, 4,),
+            n_classes=args.n_classes
+        )
+    
+    optimizer = torch.optim.Adam(model.parameters())
+
+    lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=args.max_lr, step_size_up=2000, step_size_down=None, 
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
-                                base_momentum=0.8, max_momentum=0.9, last_epoch=- 1, verbose=False)
+                                base_momentum=0.8, max_momentum=0.9, last_epoch=- 1)
     
     model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth"), weights_only=True))
 
@@ -98,12 +110,20 @@ def main():
     
     parser.add_argument("--clip", type=float, default=10.0, help="gradient clipping")
 
-    parser.add_argument("--lr", type=float, default=4*10**(-4), help="learning rate")
+    parser.add_argument("--max_lr", type=float, default=4*10**(-4), help="learning rate")
 
     parser.add_argument("--save_dir", type=str, help="directory of the saved checkpoint of the model, also where the model will be saved", default="checkpoints/")
 
+    parser.add_argument("--img_size", type=int, default=28, help="size of the (square) image")
+    parser.add_argument("--channels", type=int, default=1, help="number of channels in the image")
+    parser.add_argument("--n_classes", type=int, default=10, help="number of classes in the dataset")
+    parser.add_argument("--dim_mults", type=str, default="(1, 2, 4)", help="dimension multipliers for the U-Net f.e. '(1,2,4)'. Note that the numbers must be powers of 2 and the image size must be divisible by the last number in the tuple!")
+
 
     args = parser.parse_args()
+
+    args.dim_mults = tuple(map(int, args.dim_mults.strip("()").strip(" ").split(",")))
+
 
     from_check_point = args.from_check_point
     
@@ -118,8 +138,6 @@ def main():
     dataset = DataLoader(load_transformed_dataset(train=True), batch_size=args.batch_size, shuffle=True, drop_last=True)
     val_dataset = DataLoader(load_transformed_dataset(train=False), batch_size=args.batch_size, shuffle=True, drop_last=True)
 
-
-    print(len(dataset), len(val_dataset))
     writer = SummaryWriter("runs/") # tensorboard writer
 
     forward = ForwardDiffusion(timesteps=args.timesteps, start=0.0001, end=0.02)
@@ -131,16 +149,17 @@ def main():
     
     else:
         model = Unet(
-            dim=28,
-            channels=1,
-            dim_mults=(1, 2, 4,)
+            dim=args.img_size,
+            channels=args.channels,
+            dim_mults=args.dim_mults,
+            n_classes=args.n_classes
             )
         
         
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-        lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=0.01, step_size_up=2000, step_size_down=None, 
+        optimizer = torch.optim.Adam(model.parameters())
+        lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=args.max_lr, step_size_up=2000, step_size_down=None, 
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
-                                base_momentum=0.8, max_momentum=0.9, last_epoch=- 1, verbose=False)
+                                base_momentum=0.8, max_momentum=0.9, last_epoch=- 1)
 
 
         trainer = Trainer(model, dataset, args, val_dataset, writer=writer, optimizer=optimizer, forward_diffusion=forward, timesteps=args.timesteps, p_uncond=args.p_uncond, lr_scheduler=lr_scheduler)

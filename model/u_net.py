@@ -155,9 +155,10 @@ class Unet(nn.Module):
         dim,
         init_dim=None,
         out_dim=None,
-        dim_mults=(1, 2, 4,),
+        dim_mults=(1, 2, 4,), 
         channels=3,
-        convnext_mult=2,
+        convnext_mult=2, # multiplier for ConvNextBlock
+        n_classes=10,
     ):
         super().__init__()
 
@@ -184,7 +185,7 @@ class Unet(nn.Module):
             )
         
         self.class_mlp = nn.Sequential(
-                nn.Embedding(11, dim, padding_idx=10),
+                nn.Embedding(n_classes + 1, dim, padding_idx=n_classes),
                 nn.Linear(dim, emb_dim),
                 nn.GELU(),
                 nn.Linear(emb_dim, emb_dim),
@@ -258,6 +259,7 @@ class Unet(nn.Module):
 
         # upsample
         for block1, block2, attn, upsample in self.ups:
+
             x = torch.cat((x, h.pop()), dim=1)
             x = block1(x, t, c)
             x = block2(x, t, c)
@@ -271,10 +273,11 @@ if __name__ == "__main__":
     model = Unet(
     dim=28,
     channels=1,
-    dim_mults=(1, 2, 4,)
+    dim_mults=(1, 2, 4, 8),
+    n_classes=10
     )
     #print(model)
-    x = torch.randn(1, 1, 28, 28)
+    x = torch.randn(1, 1, 32, 32)
     time = torch.tensor([0])
     class_ = torch.tensor([0])
     out = model(x, time, class_)

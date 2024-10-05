@@ -27,6 +27,8 @@ class ForwardDiffusion:
         self.sqrt_recip_alphas = torch.sqrt(1.0 / self.alphas)
         self.alphas_cumprod_prev = F.pad(self.alphas_cumprod[:-1], (1, 0), value=1.0)
         self.posterior_variance = self.betas * (1. - self.alphas_cumprod_prev) / (1. - self.alphas_cumprod)
+
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
     @staticmethod
     def get_index_from_list(vals, t, x_shape):
@@ -111,7 +113,7 @@ class ForwardDiffusion:
 
         b = shape[0]
         # start from pure noise (for each example in the batch)
-        img = torch.randn(shape, device=device)
+        img = torch.randn(shape, device=device).to(self.device)
         imgs = []
         
         for i in tqdm(reversed(range(0, self.timesteps)), desc='sampling loop time step', total=self.timesteps):

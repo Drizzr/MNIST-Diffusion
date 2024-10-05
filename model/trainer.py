@@ -161,7 +161,7 @@ class Trainer(object):
     def save_model(self):
         print("saving model...")
         self.validate()
-        path = args.save_dir + f"checkpoint_epoch_{self.epoch}_{round(self.step/len(self.dataset)*100, 3)}%_estimated_loss_{round(float(self.val_losses[-1]), 3)}"
+        path = self.args.save_dir + f"checkpoint_epoch_{self.epoch}_{round(self.step/len(self.dataset)*100, 3)}%_estimated_loss_{round(float(self.val_losses[-1]), 3)}"
         if not os.path.exists(path= path):
             os.makedirs(path)
         
@@ -173,6 +173,10 @@ class Trainer(object):
             "timesteps": self.timesteps,
             "p_uncond": self.p_uncond,
             "total_step": self.total_step,
+            "n_classes": self.args.n_classes,
+            "img_size": self.args.img_size,
+            "channels": self.args.channels,
+            "dim_mult": self.args.dim_mults,
 
             }
         
