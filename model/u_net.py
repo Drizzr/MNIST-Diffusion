@@ -155,7 +155,7 @@ class Unet(nn.Module):
         dim,
         init_dim=None,
         out_dim=None,
-        dim_mults=(1, 2, 4, 8),
+        dim_mults=(1, 2, 4,),
         channels=3,
         convnext_mult=2,
     ):

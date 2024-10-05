@@ -20,8 +20,8 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer):
         params = json.load(f)
 
     model = Unet(
-        dim=28,
-        channels=1,
+        dim=32,
+        channels=3,
         dim_mults=(1, 2, 4,)
     )
     
@@ -64,11 +64,11 @@ def load_transformed_dataset(train=True):
     data_transform = transforms.Compose(data_transforms)
 
     if train:
-        data = torchvision.datasets.FashionMNIST(root="./data", download=True, 
+        data = torchvision.datasets.CIFAR10(root="./data_CIFAR10", download=True, 
                                             transform=data_transform, train=True)
 
     else:
-        data = torchvision.datasets.FashionMNIST(root="./data", download=True, 
+        data = torchvision.datasets.CIFAR10(root="./data_CIFAR10", download=True, 
                                             transform=data_transform, train=False)
     return data
 
@@ -100,7 +100,7 @@ def main():
 
     parser.add_argument("--lr", type=float, default=4*10**(-4), help="learning rate")
 
-    parser.add_argument("--save_dir", type=str, help="directory of the saved checkpoint of the model")
+    parser.add_argument("--save_dir", type=str, help="directory of the saved checkpoint of the model, also where the model will be saved", default="checkpoints_CIFAR10/")
 
 
     args = parser.parse_args()
@@ -132,7 +132,7 @@ def main():
     else:
         model = Unet(
             dim=28,
-            channels=1,
+            channels=3,
             dim_mults=(1, 2, 4,)
             )
         

@@ -9,12 +9,6 @@ import matplotlib.animation as animation
 
 
 
-model = Unet(
-        dim=28,
-        channels=1,
-        dim_mults=(1, 2, 4,)
-    )
-
 parser = argparse.ArgumentParser(description="Sample from the model")
 
 parser.add_argument("--batch_size", type=int, default=4, help="Batch size for sampling, must be a square number")
@@ -24,9 +18,16 @@ parser.add_argument("--c", type=int, default=1, help="Class to sample from")
 parser.add_argument("--model_path", type=str, default="checkpoints/checkpoint_epoch_41_0.0%_estimated_loss_0.035/model.pth", help="Path to the model")
 parser.add_argument("--animate", action='store_true',
                         default=True, help="Animate the diffusion process, for a single sample")
+parser.add_argument("--img_size", type=int, default=28, help="Image size")
+parser.add_argument("--channels", type=int, default=1, help="Number of channels")
 
 
 args = parser.parse_args()
+
+model = Unet(
+    dim=args.img_size,
+    channels=args.channels,
+    )
 
 BATCH_SIZE = args.batch_size
 time_steps = args.timesteps

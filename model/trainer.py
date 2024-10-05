@@ -34,6 +34,14 @@ class Trainer(object):
         self.losses = []
         self.val_losses = []
 
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda")
+        elif torch.backends.mps.is_available():
+            self.device = torch.device("mps")
+        else:
+            self.device = torch.device("cpu")
+
+
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def p_losses(self, denoise_model, x_start, t, class_, noise=None, loss_type="l1"):
@@ -58,7 +66,7 @@ class Trainer(object):
     def train(self):
 
         self.model.to(self.device)
-        self.model = torch.compile(self.model)
+        #self.model = torch.compile(self.model)
 
         stepComputeTime = time.time()
         mes = "Epoch {}, step:{}/{} {:.2f}%, Loss:{:.4f}, Perplexity:{:.4f}, time (s): {:.2f}, Epochtime (min): {:.2f}, lr: {:.6f}"
@@ -153,7 +161,7 @@ class Trainer(object):
     def save_model(self):
         print("saving model...")
         self.validate()
-        path = "checkpoints" + "/" + f"checkpoint_epoch_{self.epoch}_{round(self.step/len(self.dataset)*100, 3)}%_estimated_loss_{round(float(self.val_losses[-1]), 3)}"
+        path = args.save_dir + f"checkpoint_epoch_{self.epoch}_{round(self.step/len(self.dataset)*100, 3)}%_estimated_loss_{round(float(self.val_losses[-1]), 3)}"
         if not os.path.exists(path= path):
             os.makedirs(path)
         
