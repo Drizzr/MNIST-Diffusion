@@ -35,6 +35,8 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer):
             dim_mults=args.dim_mults,
             n_classes=args.n_classes
         )
+    
+    model.to("cuda")
 
     optimizer = torch.optim.Adam(model.parameters())
 
