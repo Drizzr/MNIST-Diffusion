@@ -151,13 +151,6 @@ def main():
 
     from_check_point = args.from_check_point
     
-    
-    print("_________________________________________________________________")
-    print("HYPERPARAMETERS: ")
-    for arg in vars(args):
-        print(arg,": ", getattr(args, arg))
-    print("_________________________________________________________________")
-    
 
     dataset = DataLoader(load_transformed_dataset(train=True), batch_size=args.batch_size, shuffle=True, drop_last=True)
     val_dataset = DataLoader(load_transformed_dataset(train=False), batch_size=args.batch_size, shuffle=True, drop_last=True)
@@ -201,6 +194,11 @@ def main():
                         forward_diffusion=forward, timesteps=args.timesteps, 
                         p_uncond=args.p_uncond, lr_scheduler=lr_scheduler)
     
+
+    print("_________________________________________________________________")
+    print("HYPERPARAMETERS: ")
+    for arg in vars(args):
+        print(arg,": ", getattr(args, arg))    
     print("_________________________________________________________________")
     print("trainable parameters: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
     print("_________________________________________________________________")

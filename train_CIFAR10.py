@@ -70,11 +70,11 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer, device):
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
                                 base_momentum=0.8, max_momentum=0.9, last_epoch=- 1)
     
-    model.load_state_dict(torch.load(os.path.join(args.load_dir, "model.pth"), weights_only=False, map_location=device))
+    model.load_state_dict(torch.load(os.path.join(args.load_dir, "model.pth"), map_location=device))
 
 
-    optimizer.load_state_dict(torch.load(os.path.join(args.load_dir, "optimizer.pth"), weights_only=False, map_location=device))
-    lr_scheduler.load_state_dict(torch.load(os.path.join(args.load_dir, "lr_scheduler.pth"), weights_only=False, map_location=device))
+    optimizer.load_state_dict(torch.load(os.path.join(args.load_dir, "optimizer.pth"), map_location=device))
+    lr_scheduler.load_state_dict(torch.load(os.path.join(args.load_dir, "lr_scheduler.pth"), map_location=device))
 
     print("model loaded successfully...")
 
@@ -135,14 +135,6 @@ def main():
 
 
     from_check_point = args.from_check_point
-    
-    
-    print("_________________________________________________________________")
-    print("HYPERPARAMETERS: ")
-    for arg in vars(args):
-        print(arg,": ", getattr(args, arg))
-    print("_________________________________________________________________")
-    
 
     dataset = DataLoader(load_transformed_dataset(train=True), batch_size=args.batch_size, shuffle=True, drop_last=True)
     val_dataset = DataLoader(load_transformed_dataset(train=False), batch_size=args.batch_size, shuffle=True, drop_last=True)
@@ -186,6 +178,10 @@ def main():
                         forward_diffusion=forward, timesteps=args.timesteps, 
                         p_uncond=args.p_uncond, lr_scheduler=lr_scheduler)
     
+    print("_________________________________________________________________")
+    print("HYPERPARAMETERS: ")
+    for arg in vars(args):
+        print(arg,": ", getattr(args, arg))    
     print("_________________________________________________________________")
     print("trainable parameters: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
     print("_________________________________________________________________")
