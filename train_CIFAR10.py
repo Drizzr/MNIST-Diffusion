@@ -22,13 +22,13 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer):
         args.img_size = params["img_size"]
         args.channels = params["channels"]
         args.n_classes = params["n_classes"]
-        args.dim_mult = params["dim_mults"]
+        args.dim_mults = params["dim_mults"]
 
     except KeyError:
         # for backward compatibility
         print("params file incomplete, using default values...")
         pass
-        
+    
     model = Unet(
             dim=args.img_size,
             channels=args.channels,
