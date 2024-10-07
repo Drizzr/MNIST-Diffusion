@@ -48,7 +48,7 @@ class Trainer(object):
 
     def p_losses(self, denoise_model, x_start, t, class_, noise=None, loss_type="l1"):
         if noise is None:
-            noise = torch.randn_like(x_start)
+            noise = torch.randn_like(x_start).to(self.device)
 
         x_noisy = self.forward_diffusion.q_sample(x_start=x_start, t=t, noise=noise)
         predicted_noise = denoise_model(x_noisy, t, class_)
@@ -84,7 +84,7 @@ class Trainer(object):
                 self.optimizer.zero_grad()
 
                 imgs, class_ = data # imgs -> (batch_size, 1, 28, 28), class_ -> (batch_size,)
-                t = torch.randint(0, self.timesteps, (self.args.batch_size,), device=self.device).long()
+                t = torch.randint(0, self.timesteps, (self.args.batch_size,), device=self.device).long().to(self.device)
                 
                 imgs.to(self.device)
 
