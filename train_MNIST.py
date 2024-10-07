@@ -37,17 +37,17 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer):
             n_classes=args.n_classes
         )
     
-    optimizer = torch.optim.Adam(model.parameters()).to(torch.device("cuda"))
+    optimizer = torch.optim.Adam(model.parameters())
 
     lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=args.max_lr, step_size_up=2000, step_size_down=None, 
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
-                                base_momentum=0.8, max_momentum=0.9, last_epoch=- 1).to(torch.device("cuda"))
+                                base_momentum=0.8, max_momentum=0.9, last_epoch=- 1)
     
     model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth"), weights_only=True))
 
 
-    optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth"), weights_only=True, map_location=torch.device("cuda")))
-    lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth"), weights_only=True, map_location=torch.device("cuda")))
+    optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth"), weights_only=True))
+    lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth"), weights_only=True))
 
     print("model loaded successfully...")
 
