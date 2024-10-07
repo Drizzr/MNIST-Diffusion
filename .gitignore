@@ -2,7 +2,9 @@ venv
 runs
 .Ds_Store
 __pycache__
-/__pycache__
+*/__pycache__
 diffusion.gif
 samples.png
 data
+**/[Oo]ptimizer*
+**/[Ll]_scheduler*
