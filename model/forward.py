@@ -35,8 +35,8 @@ class ForwardDiffusion:
 
         
         
-    @staticmethod
-    def get_index_from_list(vals, t, x_shape):
+
+    def get_index_from_list(self, vals, t, x_shape):
         """ 
         Returns a specific index t of a passed list of values vals
         while considering the batch dimension.
@@ -44,9 +44,9 @@ class ForwardDiffusion:
         If t.shape[0] != vals.shape[0], the function will return the sample for the corresponding index
         """
         batch_size = t.shape[0]
-        out = vals.gather(-1, t.cpu()) # t is a tensor of shape (batch_size,), returns a tensor of shape (batch_size,) with corresponding values
+        out = vals.gather(-1, t.to(self.device)) # t is a tensor of shape (batch_size,), returns a tensor of shape (batch_size,) with corresponding values
 
-        return out.reshape(batch_size, *((1,) * (len(x_shape) - 1))).to(t.device)
+        return out.reshape(batch_size, *((1,) * (len(x_shape) - 1))).to(self.device)
     
 
     # forward diffusion
