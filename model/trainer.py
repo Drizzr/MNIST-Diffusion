@@ -65,7 +65,7 @@ class Trainer(object):
     def train(self):
 
         self.model.to(self.device)
-        #self.model = torch.compile(self.model)
+        #self.model = torch.compile(self.model, backend="aot_eager")
 
         stepComputeTime = time.time()
         mes = "Epoch {}, step:{}/{} {:.2f}%, Loss:{:.4f}, Perplexity:{:.4f}, time (s): {:.2f}, Epochtime (min): {:.2f}, lr: {:.6f}"
@@ -181,7 +181,7 @@ class Trainer(object):
             "n_classes": self.args.n_classes,
             "img_size": self.args.img_size,
             "channels": self.args.channels,
-            "dim_mult": self.args.dim_mults,
+            "dim_mults": self.args.dim_mults,
 
             }
         

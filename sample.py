@@ -16,12 +16,10 @@ parser = argparse.ArgumentParser(description="Sample from the model")
 parser.add_argument("--batch_size", type=int, default=4, help="Batch size for sampling, must be a square number")
 parser.add_argument("--timesteps", type=int, default=200, help="Number of timesteps")
 parser.add_argument("--guidance", type=float, default=7, help="guidance value")
-parser.add_argument("--c", type=int, default=1, help="Class to sample from")
-parser.add_argument("--model_path", type=str, default="checkpoints/checkpoint_epoch_41_0.0%_estimated_loss_0.035/", help="Path to the model")
+parser.add_argument("--c", type=int, default=0, help="Class to sample from")
+parser.add_argument("--model_path", type=str, default="checkpoints_CIFAR10/checkpoint_epoch_3_0.0%_estimated_loss_0.037", help="Path to the model")
 parser.add_argument("--animate", action='store_true',
                         default=True, help="Animate the diffusion process, for a single sample")
-
-
 
 args = parser.parse_args()
 
@@ -35,7 +33,8 @@ try:
     n_classes = params["n_classes"]
     dim_mults = params["dim_mults"]
 
-except:
+except Exception as e:
+    print(e)
     print("params.json incomplete, reverting to default values")
     img_size = 28
     channels = 1
@@ -46,7 +45,7 @@ except:
 model = Unet(
     dim=img_size,
     channels=channels,
-    dim_mults=(1, 2, 4,),
+    dim_mults=dim_mults,
     n_classes=n_classes
     )
 
@@ -56,12 +55,17 @@ guidance = args.guidance
 class_ = args.c
 animate = args.animate
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if torch.cuda.is_available():
+    DEVICE = torch.device("cuda")
+elif torch.backends.mps.is_available():
+    DEVICE = torch.device("mps")
+else:
+    DEVICE = torch.device("cpu")
 
 print(f"Sampling from the model on {DEVICE}...")
 
 
-model.load_state_dict(torch.load(os.path.join(args.model_path, "model.pth"), weights_only=True))
+model.load_state_dict(torch.load(os.path.join(args.model_path, "model.pth"), map_location=DEVICE))
 model.eval()
 
 model.to(DEVICE)
@@ -69,17 +73,18 @@ model.to(DEVICE)
 
 forward = ForwardDiffusion(timesteps=time_steps, start=0.0001, end=0.02)
 
-samples = forward.sample(model, image_size=28, batch_size=BATCH_SIZE, channels=1, class_=torch.tensor([class_]).to(DEVICE), guidance=guidance) 
+samples = forward.sample(model, image_size=img_size, batch_size=BATCH_SIZE, channels=channels, class_=torch.tensor([class_]).to(DEVICE), guidance=guidance) 
 
 
 # create a grid of 8x8 images
 fig, ax = plt.subplots(int(np.sqrt(BATCH_SIZE)), int(np.sqrt(BATCH_SIZE)), figsize=(10, 10))
 for i in range(int(np.sqrt(BATCH_SIZE))):
     for j in range(int(np.sqrt(BATCH_SIZE))):
+        samples[-1][i*int(np.sqrt(BATCH_SIZE))+j] = np.clip((samples[-1][i*int(np.sqrt(BATCH_SIZE))+j] + 1) / 2, 0, 1)
         if channels == 1:
             ax[i, j].imshow(samples[-1][i*int(np.sqrt(BATCH_SIZE))+j].reshape(img_size, img_size, channels), cmap="gray")
         else:
-            ax[i, j].imshow(samples[-1][i*int(np.sqrt(BATCH_SIZE))+j].reshape(img_size, img_size, channels))
+            ax[i, j].imshow(samples[-1][i*int(np.sqrt(BATCH_SIZE))+j].reshape(img_size, img_size, channels), cmap="viridis")
 
 
 fig.savefig("samples.png")
@@ -92,9 +97,9 @@ if animate:
     fig = plt.figure()
     ims = []
     for i in range(0, 200):
+        samples[i][random_index] = np.clip((samples[i][random_index] + 1) / 2, 0, 1)
         if channels == 1:
             im = plt.imshow(samples[i][random_index].reshape(img_size, img_size, channels), cmap="gray", animated=True)
-
         else:
             im = plt.imshow(samples[i][random_index].reshape(img_size, img_size, channels), animated=True)
         ims.append([im])

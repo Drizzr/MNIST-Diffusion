@@ -70,7 +70,7 @@ def load_transformed_dataset(train=True):
     data_transforms = [
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(), # Scales data into [0,1] 
-        transforms.Lambda(lambda t: (t * 2) - 1) # Scale between [-1, 1] 
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) # Scale between [-1, 1]
     ]
     data_transform = transforms.Compose(data_transforms)
 
