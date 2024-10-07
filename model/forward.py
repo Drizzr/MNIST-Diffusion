@@ -31,7 +31,7 @@ class ForwardDiffusion:
 
 
         self.alphas = 1. - self.betas # (T,)
-        self.alphas_cumprod = torch.cumprod(self.alphas, axis=0) # (T,) calculate the cumulative product of the alphas
+        self.alphas_cumprod = torch.cumprod(self.alphas, axis=0).to(self.device) # (T,) calculate the cumulative product of the alphas
         self.sqrt_alphas_cumprod = torch.sqrt(self.alphas_cumprod).to(self.device) # (T,) calculate the square root of the cumulative product of the alphas
         self.sqrt_one_minus_alphas_cumprod = torch.sqrt(1. - self.alphas_cumprod).to(self.device) # (T,) calculate 1 - the cumulative product of the alphas
         self.sqrt_recip_alphas = torch.sqrt(1.0 / self.alphas).to(self.device)
