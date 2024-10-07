@@ -41,7 +41,7 @@ def load_transformed_dataset(train=True):
 def load_from_checkpoint(args, forward, dataset, val_dataset, writer, device):
     """Load model from checkpoint"""
     print("loading model from checkpoint...")
-    with open(os.path.join(args.save_dir, "params.json"), "r") as f:
+    with open(os.path.join(args.load_dir, "params.json"), "r") as f:
         params = json.load(f)
 
     try:
@@ -120,7 +120,8 @@ def main():
 
     parser.add_argument("--max_lr", type=float, default=4*10**(-4), help="learning rate")
 
-    parser.add_argument("--save_dir", type=str, help="directory of the saved checkpoint of the model, also where the model will be saved", default="checkpoints/")
+    parser.add_argument("--load_dir", type=str, help="directory of the saved checkpoint of the model")
+    parser.add_argument("--save_dir", type=str, help="where the model will be saved", default="checkpoints_CIFAR10/")
 
     parser.add_argument("--img_size", type=int, default=28, help="size of the (square) image")
     parser.add_argument("--channels", type=int, default=1, help="number of channels in the image")
