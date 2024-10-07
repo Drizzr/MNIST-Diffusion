@@ -66,7 +66,7 @@ class Trainer(object):
     def train(self):
 
         self.model.to(self.device)
-        #self.model = torch.compile(self.model)
+        self.model = torch.compile(self.model)
 
         stepComputeTime = time.time()
         mes = "Epoch {}, step:{}/{} {:.2f}%, Loss:{:.4f}, Perplexity:{:.4f}, time (s): {:.2f}, Epochtime (min): {:.2f}, lr: {:.6f}"
