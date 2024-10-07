@@ -43,11 +43,11 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer):
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
                                 base_momentum=0.8, max_momentum=0.9, last_epoch=- 1)
     
-    model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth"), weights_only=True))
+    model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth"), weights_only=True, map_location=torch.device("cuda")))
 
 
-    optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth"), weights_only=True))
-    lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth"), weights_only=True))
+    optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth"), weights_only=True, map_location=torch.device("cuda")))
+    lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth"), weights_only=True, map_location=torch.device("cuda")))
 
     print("model loaded successfully...")
 
