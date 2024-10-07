@@ -8,3 +8,6 @@ samples.png
 data
 **/[Oo]ptimizer*
 **/[Ll]_scheduler*
+*.pyc
+*.pyo
+!**/__pycache__/
