@@ -44,8 +44,6 @@ class Trainer(object):
         print(torch.cuda.is_available())
 
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     def p_losses(self, denoise_model, x_start, t, class_, noise=None, loss_type="l1"):
         if noise is None:
             noise = torch.randn_like(x_start).to(self.device)

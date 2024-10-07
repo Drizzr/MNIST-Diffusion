@@ -26,12 +26,12 @@ class ForwardDiffusion:
 
 
         self.alphas = 1. - self.betas # (T,)
-        self.alphas_cumprod = torch.cumprod(self.alphas, axis=0) # (T,) calculate the cumulative product of the alphas
-        self.sqrt_alphas_cumprod = torch.sqrt(self.alphas_cumprod) # (T,) calculate the square root of the cumulative product of the alphas
-        self.sqrt_one_minus_alphas_cumprod = torch.sqrt(1. - self.alphas_cumprod) # (T,) calculate 1 - the cumulative product of the alphas
-        self.sqrt_recip_alphas = torch.sqrt(1.0 / self.alphas)
-        self.alphas_cumprod_prev = F.pad(self.alphas_cumprod[:-1], (1, 0), value=1.0)
-        self.posterior_variance = self.betas * (1. - self.alphas_cumprod_prev) / (1. - self.alphas_cumprod)
+        self.alphas_cumprod = torch.cumprod(self.alphas, axis=0).to(self.device) # (T,) calculate the cumulative product of the alphas
+        self.sqrt_alphas_cumprod = torch.sqrt(self.alphas_cumprod).to(self.device) # (T,) calculate the square root of the cumulative product of the alphas
+        self.sqrt_one_minus_alphas_cumprod = torch.sqrt(1. - self.alphas_cumprod).to(self.device) # (T,) calculate 1 - the cumulative product of the alphas
+        self.sqrt_recip_alphas = torch.sqrt(1.0 / self.alphas).to(self.device)
+        self.alphas_cumprod_prev = F.pad(self.alphas_cumprod[:-1], (1, 0), value=1.0).to(self.device)
+        self.posterior_variance = self.betas * (1. - self.alphas_cumprod_prev) / (1. - self.alphas_cumprod).to(self.device)
 
         
         
