@@ -27,7 +27,9 @@ class ForwardDiffusion:
         else:
             self.device = torch.device("cpu")
 
-        self.betas.to(self.device)
+ 
+
+        self.betas = self.betas.to(self.device)
 
 
         self.alphas = 1. - self.betas # (T,)
