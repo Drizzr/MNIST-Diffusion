@@ -22,6 +22,8 @@ class ForwardDiffusion:
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+        print(self.device)
+
         self.betas = self.betas.to(self.device)
 
 
@@ -44,15 +46,21 @@ class ForwardDiffusion:
         If t.shape[0] != vals.shape[0], the function will return the sample for the corresponding index
         """
         batch_size = t.shape[0]
-        out = vals.gather(-1, t.to(self.device)) # t is a tensor of shape (batch_size,), returns a tensor of shape (batch_size,) with corresponding values
+        out = vals.gather(-1, t.to(self.device)).to(self.device) # t is a tensor of shape (batch_size,), returns a tensor of shape (batch_size,) with corresponding values
 
         return out.reshape(batch_size, *((1,) * (len(x_shape) - 1))).to(self.device)
     
 
     # forward diffusion
     def q_sample(self, x_start, t, noise=None):
+
+        x_start = x_start.to(self.device)
+        t = t.to(self.device)
+
         if noise is None:
             noise = torch.randn_like(x_start).to(self.device)
+        else:
+            noise = noise.to(self.device)
 
         sqrt_alphas_cumprod_t = self.get_index_from_list(self.sqrt_alphas_cumprod, t, x_start.shape)
         sqrt_one_minus_alphas_cumprod_t = self.get_index_from_list(
