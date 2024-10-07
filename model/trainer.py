@@ -47,8 +47,9 @@ class Trainer(object):
     def p_losses(self, denoise_model, x_start, t, class_, noise=None, loss_type="l1"):
         if noise is None:
             noise = torch.randn_like(x_start).to(self.device)
+        
+        x_noisy = self.forward_diffusion.q_sample(x_start=x_start, t=t, noise=noise).to(self.device)
 
-        x_noisy = self.forward_diffusion.q_sample(x_start=x_start, t=t, noise=noise)
         predicted_noise = denoise_model(x_noisy, t, class_)
 
         if loss_type == 'l1':
@@ -87,7 +88,7 @@ class Trainer(object):
                 imgs.to(self.device)
 
                 # randomly asign class 10 to p_uncond of the data
-                class_ = torch.where(torch.rand(self.args.batch_size) < self.p_uncond, torch.tensor(10), class_)
+                class_ = torch.where(torch.rand(self.args.batch_size) < self.p_uncond, torch.tensor(10), class_).to(self.device)
 
                 class_.to(self.device)
 
