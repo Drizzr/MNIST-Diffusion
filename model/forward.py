@@ -20,6 +20,11 @@ class ForwardDiffusion:
         else:
             self.betas = self.cosine_beta_schedule()
 
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        self.betas.to(self.device)
+
+
         self.alphas = 1. - self.betas # (T,)
         self.alphas_cumprod = torch.cumprod(self.alphas, axis=0) # (T,) calculate the cumulative product of the alphas
         self.sqrt_alphas_cumprod = torch.sqrt(self.alphas_cumprod) # (T,) calculate the square root of the cumulative product of the alphas
@@ -28,7 +33,7 @@ class ForwardDiffusion:
         self.alphas_cumprod_prev = F.pad(self.alphas_cumprod[:-1], (1, 0), value=1.0)
         self.posterior_variance = self.betas * (1. - self.alphas_cumprod_prev) / (1. - self.alphas_cumprod)
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
         
     @staticmethod
     def get_index_from_list(vals, t, x_shape):
