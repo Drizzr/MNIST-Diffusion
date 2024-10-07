@@ -43,8 +43,9 @@ class ForwardDiffusion:
 
         If t.shape[0] != vals.shape[0], the function will return the sample for the corresponding index
         """
+        vals.to(self.device)
         batch_size = t.shape[0]
-        out = vals.gather(-1, t.to(self.device)) # t is a tensor of shape (batch_size,), returns a tensor of shape (batch_size,) with corresponding values
+        out = vals.gather(-1, t.to(self.device)).to(self.device) # t is a tensor of shape (batch_size,), returns a tensor of shape (batch_size,) with corresponding values
 
         return out.reshape(batch_size, *((1,) * (len(x_shape) - 1)))
     
