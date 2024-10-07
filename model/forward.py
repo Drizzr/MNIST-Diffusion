@@ -22,7 +22,7 @@ class ForwardDiffusion:
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.betas.to(self.device)
+        self.betas = self.betas.to(self.device)
 
 
         self.alphas = 1. - self.betas # (T,)
@@ -52,7 +52,7 @@ class ForwardDiffusion:
     # forward diffusion
     def q_sample(self, x_start, t, noise=None):
         if noise is None:
-            noise = torch.randn_like(x_start)
+            noise = torch.randn_like(x_start).to(self.device)
 
         sqrt_alphas_cumprod_t = self.get_index_from_list(self.sqrt_alphas_cumprod, t, x_start.shape)
         sqrt_one_minus_alphas_cumprod_t = self.get_index_from_list(
