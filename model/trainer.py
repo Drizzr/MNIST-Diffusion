@@ -41,8 +41,6 @@ class Trainer(object):
         else:
             self.device = torch.device("cpu")
 
-        print(torch.cuda.is_available())
-
 
     def p_losses(self, denoise_model, x_start, t, class_, noise=None, loss_type="l1"):
         if noise is None:
@@ -72,6 +70,8 @@ class Trainer(object):
         stepComputeTime = time.time()
         mes = "Epoch {}, step:{}/{} {:.2f}%, Loss:{:.4f}, Perplexity:{:.4f}, time (s): {:.2f}, Epochtime (min): {:.2f}, lr: {:.6f}"
         print("Training on 👀: ", self.device)
+
+        self.validate()
  
         while self.epoch < self.last_epoch:
             losses = 0.0
@@ -142,8 +142,12 @@ class Trainer(object):
             if i == limit:
                 break
             imgs, class_ = data # imgs -> (batch_size, 1, 28, 28), class_ -> (batch_size,)
-            t = torch.randint(0, self.timesteps, (self.args.batch_size,), device=self.device).long()
-            class_ = torch.where(torch.rand(self.args.batch_size) < self.p_uncond, torch.tensor(10), class_)
+            imgs.to(self.device)
+            class_.to(self.device)
+
+            
+            t = torch.randint(0, self.timesteps, (self.args.batch_size,), device=self.device).long().to(self.device)
+            class_ = torch.where(torch.rand(self.args.batch_size) < self.p_uncond, torch.tensor(10), class_).to(self.device)
             
             with torch.no_grad():
 
