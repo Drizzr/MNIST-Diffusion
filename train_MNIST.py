@@ -13,7 +13,47 @@ import os
 
 
 
-def load_from_checkpoint(args, forward, dataset, val_dataset, writer):
+###################################
+# Modyfing this function to use your custom dataset
+##################################
+
+def load_transformed_dataset(train=True):
+    data_transforms = [
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(), # Scales data into [0,1] 
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) # Scale between [-1, 1]
+    ]
+    data_transform = transforms.Compose(data_transforms)
+
+    if train:
+        data = torchvision.datasets.FashionMNIST(root="./data", download=True, 
+                                            transform=data_transform, train=True)
+
+    else:
+        data = torchvision.datasets.FashionMNIST(root="./data", download=True, 
+                                            transform=data_transform, train=False)
+    return data
+
+
+###################################
+###################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def load_from_checkpoint(args, forward, dataset, val_dataset, writer, device):
     """Load model from checkpoint"""
     print("loading model from checkpoint...")
     with open(os.path.join(args.save_dir, "params.json"), "r") as f:
@@ -37,54 +77,37 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer):
             n_classes=args.n_classes
         )
     
+    model.to(device)
+    
     optimizer = torch.optim.Adam(model.parameters())
 
     lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=args.max_lr, step_size_up=2000, step_size_down=None, 
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
                                 base_momentum=0.8, max_momentum=0.9, last_epoch=- 1)
     
-    model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth"), weights_only=True))
+    model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth"), weights_only=True, map_location=device))
 
 
-    optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth"), weights_only=True))
-    lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth"), weights_only=True))
+    optimizer.load_state_dict(torch.load(os.path.join(args.save_dir, "optimizer.pth"), weights_only=True, map_location=device))
+    lr_scheduler.load_state_dict(torch.load(os.path.join(args.save_dir, "lr_scheduler.pth"), weights_only=True, map_location=device))
 
     print("model loaded successfully...")
 
     trainer = Trainer(model, dataset, args, val_dataset, 
-                        init_epoch=params["epoch"], 
-                        last_epoch=args.num_epochs, writer=writer, optimizer=optimizer, forward_diffusion=forward, 
-                        p_uncond=params["p_uncond"], timesteps=params["timesteps"],
-                        lr_scheduler=lr_scheduler)
+                        init_epoch=params["epoch"], device=device,
+                        last_epoch=args.num_epochs, writer=writer, optimizer=optimizer, 
+                        forward_diffusion=forward, p_uncond=params["p_uncond"], 
+                        timesteps=params["timesteps"], lr_scheduler=lr_scheduler)
+
 
     current_batch_size = args.batch_size
     checkpoint_batch_size = params["batch_size"]
-
 
     trainer.step = params["step"] * (checkpoint_batch_size // current_batch_size)
     trainer.total_step = params["total_step"] 
 
     return trainer, model
 
-
-def load_transformed_dataset(train=True):
-    data_transforms = [
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(), # Scales data into [0,1] 
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) # Scale between [-1, 1]
-    ]
-    data_transform = transforms.Compose(data_transforms)
-
-    if train:
-        data = torchvision.datasets.FashionMNIST(root="./data", download=True, 
-                                            transform=data_transform, train=True)
-
-    else:
-        data = torchvision.datasets.FashionMNIST(root="./data", download=True, 
-                                            transform=data_transform, train=False)
-    return data
-
-    
 
 def main():
 
@@ -144,8 +167,17 @@ def main():
 
     print("sucessfully loaded dataset...")
 
+    #######################################
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    #######################################
+
     if from_check_point:
-        trainer, model = load_from_checkpoint(args, forward, dataset, val_dataset, writer)
+        trainer, model = load_from_checkpoint(args, forward, dataset, val_dataset, writer, device)
     
     else:
         model = Unet(
@@ -155,14 +187,18 @@ def main():
             n_classes=args.n_classes
             )
         
+        model.to(device)
+        
         
         optimizer = torch.optim.Adam(model.parameters())
         lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=args.max_lr, step_size_up=2000, step_size_down=None, 
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
                                 base_momentum=0.8, max_momentum=0.9, last_epoch=- 1)
 
-
-        trainer = Trainer(model, dataset, args, val_dataset, writer=writer, optimizer=optimizer, forward_diffusion=forward, timesteps=args.timesteps, p_uncond=args.p_uncond, lr_scheduler=lr_scheduler)
+        trainer = Trainer(model, dataset, args, val_dataset,
+                        writer=writer, device=device, optimizer=optimizer, 
+                        forward_diffusion=forward, timesteps=args.timesteps, 
+                        p_uncond=args.p_uncond, lr_scheduler=lr_scheduler)
     
     print("_________________________________________________________________")
     print("trainable parameters: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
@@ -183,3 +219,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

@@ -8,7 +8,7 @@ import torch.nn.functional as F
 
 class Trainer(object):
     def __init__(self, model,
-                dataset, args, val_dataset, forward_diffusion, optimizer, writer, timesteps, p_uncond, lr_scheduler=None,
+                dataset, args, val_dataset, forward_diffusion, optimizer, writer, device, timesteps, p_uncond, lr_scheduler=None,
                 init_epoch=1, last_epoch=15):
 
 
@@ -34,14 +34,12 @@ class Trainer(object):
         self.losses = []
         self.val_losses = []
 
-        if torch.cuda.is_available():
-            self.device = torch.device("cuda")
-        elif torch.backends.mps.is_available():
-            self.device = torch.device("mps")
-        else:
-            self.device = torch.device("cpu")
-
+        self.device = device
         self.forward_diffusion.device = self.device
+
+        # print model summary
+        print("Model Summary: ")
+        print(model)
 
 
     def p_losses(self, denoise_model, x_start, t, class_, noise=None, loss_type="l1"):
@@ -66,7 +64,6 @@ class Trainer(object):
 
     def train(self):
 
-        self.model.to(self.device)
         #self.model = torch.compile(self.model, backend="aot_eager")
 
         stepComputeTime = time.time()
@@ -196,6 +193,8 @@ class Trainer(object):
         torch.save(self.lr_scheduler.state_dict(), os.path.join(path, "lr_scheduler.pth"))
 
         print("model saved successfully...")
+
+    
 
 
 
