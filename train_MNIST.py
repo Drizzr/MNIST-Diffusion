@@ -37,11 +37,11 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer):
             n_classes=args.n_classes
         )
     
-    optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.Adam(model.parameters()).to("cpu")
 
     lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=args.max_lr, step_size_up=2000, step_size_down=None, 
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
-                                base_momentum=0.8, max_momentum=0.9, last_epoch=- 1)
+                                base_momentum=0.8, max_momentum=0.9, last_epoch=- 1).to("cpu")
     
     model.load_state_dict(torch.load(os.path.join(args.save_dir, "model.pth"), weights_only=True))
 
