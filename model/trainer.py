@@ -41,6 +41,8 @@ class Trainer(object):
         else:
             self.device = torch.device("cpu")
 
+        print(torch.cuda.is_available())
+
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
