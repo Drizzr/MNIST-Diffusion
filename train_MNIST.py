@@ -73,7 +73,7 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer, device):
     model = Unet(
             dim=args.img_size,
             channels=args.channels,
-            dim_mults=(1, 2, 4,),
+            dim_mults=args.dim_mults,
             n_classes=args.n_classes
         )
     
