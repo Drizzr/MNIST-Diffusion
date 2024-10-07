@@ -22,20 +22,24 @@ def show_images(datset, num_samples=20, cols=4):
 #show_images(data)
 
 
-def load_transformed_dataset():
+def load_transformed_dataset(train=True):
     data_transforms = [
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(), # Scales data into [0,1] 
-        transforms.Lambda(lambda t: (t * 2) - 1) # Scale between [-1, 1] 
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) # Scale between [-1, 1]
     ]
     data_transform = transforms.Compose(data_transforms)
 
-    train = torchvision.datasets.FashionMNIST(root="./data", download=True, 
-                                        transform=data_transform, train=True)
+    if train:
+        data = torchvision.datasets.CIFAR10(root="./data", download=True, 
+                                            transform=data_transform, train=True)
 
-    test = torchvision.datasets.FashionMNIST(root="./data", download=True, 
-                                        transform=data_transform, train=False)
-    return torch.utils.data.ConcatDataset([train, test])
+    else:
+        data = torchvision.datasets.CIFAR10(root="./data", download=True, 
+                                            transform=data_transform, train=False)
+
+
+    return data
 
 def show_tensor_image(image):
     reverse_transforms = transforms.Compose([
@@ -49,7 +53,7 @@ def show_tensor_image(image):
     # Take first image of batch
     if len(image.shape) == 4:
         image = image[0, :, :, :] 
-    plt.imshow(reverse_transforms(image), cmap='gray')
+    plt.imshow(reverse_transforms(image))
 
 data = load_transformed_dataset()
 dataloader = DataLoader(data, batch_size=2, shuffle=True, drop_last=True)

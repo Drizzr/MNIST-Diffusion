@@ -1,22 +1,20 @@
 import torch.nn.functional as F
 import torch
 from tqdm.auto import tqdm
+from torchvision import transforms 
+import numpy as np
+
 
 
 class ForwardDiffusion:
 
-    def __init__(self, timesteps: int = 200, start: float =0.0001, end: float =0.02, scedule_type: str = "linear"  ) -> None:
+    def __init__(self, timesteps: int = 200, start: float =0.0001, end: float =0.02, scedule_type: str = "linear", device = torch.device("cpu")) -> None:
         
         self.timesteps = timesteps
         self.start = start
         self.end = end
-
-        if torch.cuda.is_available():
-            self.device = torch.device("cuda")
-        elif torch.backends.mps.is_available():
-            self.device = torch.device("mps")
-        else:
-            self.device = torch.device("cpu")
+        self.device = device
+        
 
 
         if scedule_type == "linear":
@@ -128,10 +126,17 @@ class ForwardDiffusion:
         # start from pure noise (for each example in the batch)
         img = torch.randn(shape, device=self.device).to(self.device)
         imgs = []
+
+        reverse_transforms = transforms.Compose([
+            transforms.Lambda(lambda t: (t + 1) / 2),
+            transforms.Lambda(lambda t: t.permute(0, 2, 3, 1)), # CHW to HWC
+            transforms.Lambda(lambda t: t * 255.),
+            transforms.Lambda(lambda t: t.numpy().astype(np.uint8)),
+        ])
         
         for i in tqdm(reversed(range(0, self.timesteps)), desc='sampling loop time step', total=self.timesteps):
             img = self.p_sample(model, img, torch.full((b,), i, device=self.device, dtype=torch.long), i, class_, guidance)
-            imgs.append(img.cpu().numpy())
+            imgs.append(reverse_transforms(torch.clamp(img.cpu(), -1, 1)))
         return imgs
 
     @torch.no_grad()

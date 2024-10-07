@@ -41,6 +41,8 @@ class Trainer(object):
         else:
             self.device = torch.device("cpu")
 
+        self.forward_diffusion.device = self.device
+
 
     def p_losses(self, denoise_model, x_start, t, class_, noise=None, loss_type="l1"):
         if noise is None:
