@@ -7,7 +7,7 @@ diffusion.gif
 samples.png
 data
 **/[Oo]ptimizer*
-**/[Ll]_scheduler*
+**/[Ll]r_scheduler*
 *.pyc
 *.pyo
 !**/__pycache__/
