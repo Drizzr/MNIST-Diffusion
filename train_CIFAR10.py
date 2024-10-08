@@ -66,15 +66,15 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer, device):
     
     optimizer = torch.optim.Adam(model.parameters())
 
-    lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=args.max_lr, step_size_up=2000, step_size_down=None, 
+    lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=0.0002, step_size_up=2000, step_size_down=None, 
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
                                 base_momentum=0.8, max_momentum=0.9, last_epoch=- 1)
     
     model.load_state_dict(torch.load(os.path.join(args.load_dir, "model.pth"), map_location=device))
 
 
-    optimizer.load_state_dict(torch.load(os.path.join(args.load_dir, "optimizer.pth"), map_location=device))
-    lr_scheduler.load_state_dict(torch.load(os.path.join(args.load_dir, "lr_scheduler.pth"), map_location=device))
+    #optimizer.load_state_dict(torch.load(os.path.join(args.load_dir, "optimizer.pth"), map_location=device))
+    #lr_scheduler.load_state_dict(torch.load(os.path.join(args.load_dir, "lr_scheduler.pth"), map_location=device))
 
     print("model loaded successfully...")
 
