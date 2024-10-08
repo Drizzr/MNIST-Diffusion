@@ -66,7 +66,7 @@ def load_from_checkpoint(args, forward, dataset, val_dataset, writer, device):
     
     optimizer = torch.optim.Adam(model.parameters())
 
-    lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=0.0002, step_size_up=2000, step_size_down=None, 
+    lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.0001, max_lr=args.max_lr, step_size_up=2000, step_size_down=None, 
                                 mode='triangular2', gamma=0.1, scale_fn=None, scale_mode='cycle', cycle_momentum=False, 
                                 base_momentum=0.8, max_momentum=0.9, last_epoch=- 1)
     
