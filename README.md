@@ -93,6 +93,7 @@ Feel free to explore and modify the code to suit your needs!
 
 | ![image](https://github.com/user-attachments/assets/9fd476e4-dd39-42f6-b04f-d0a5d10651a6)| ![image](https://github.com/user-attachments/assets/b3e6e7d1-4c8d-46f0-b078-bd521a0c8578) | ![image](https://github.com/user-attachments/assets/5e3f97dc-6de7-410f-8d04-59947922fe7b)|
 |:--:|:--:|:--:|
+|'car'|'dog'|'ship'|
 
 
 
