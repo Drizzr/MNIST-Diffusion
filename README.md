@@ -89,4 +89,10 @@ Feel free to explore and modify the code to suit your needs!
 |:--:|:--:|:--:|
 | ![diffusion-4](https://github.com/user-attachments/assets/25eb0b8b-9051-4af9-9518-7436f973d57b) | ![diffusion-5](https://github.com/user-attachments/assets/aa774bb4-597a-46e0-a91e-720c223eb90b) | ![diffusion](https://github.com/user-attachments/assets/e59f2e20-3b2d-472e-af3a-2744d7f7a332) |
 
+## Examples CIFAR10-Dataset:
+
+| ![image](https://github.com/user-attachments/assets/9fd476e4-dd39-42f6-b04f-d0a5d10651a6)| ![image](https://github.com/user-attachments/assets/b3e6e7d1-4c8d-46f0-b078-bd521a0c8578) | ![image](https://github.com/user-attachments/assets/5e3f97dc-6de7-410f-8d04-59947922fe7b)|
+|:--:|:--:|:--:|
+
+
 
