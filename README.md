@@ -83,7 +83,7 @@ To adapt this model to a different dataset, change the `torchvision.datasets.Fas
   
 Feel free to explore and modify the code to suit your needs!
 
-## Examples:
+## Examples FashionMNIST-Dataset:
 
 | ![diffusion-1](https://github.com/user-attachments/assets/2fe5770a-d402-4865-8f0c-ec977c7ff20e) | ![diffusion-2](https://github.com/user-attachments/assets/7ee2d08b-15b1-4253-9ff4-a550df7c9668) | ![diffusion-3](https://github.com/user-attachments/assets/ce6ba0b8-33e2-4951-b1c5-90851d9b92c3) |
 |:--:|:--:|:--:|
